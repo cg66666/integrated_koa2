@@ -3,17 +3,11 @@
  * @Author: cg
  * @Date: 2024-08-28 17:01:41
  * @LastEditors: cg
- * @LastEditTime: 2024-09-25 16:06:28
+ * @LastEditTime: 2024-11-04 15:02:06
  */
-// const path = require("path");
 import path from "path";
-import { fileURLToPath } from "url";
 import log4js from "koa-log4";
-// const log4js = require("koa-log4");
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const RUNTIME_PATH = path.resolve(__dirname, "../");
-const LOG_PATH = path.join(RUNTIME_PATH, "log");
+const LOG_PATH = path.join(import.meta.dirname, "../log");
 
 log4js.configure({
   // 日志的输出
@@ -51,8 +45,8 @@ log4js.configure({
   categories: {
     default: { appenders: ["out"], level: "info" },
     common: { appenders: ["common"], level: "info" },
-    login: { appenders: ["SSO"], level: "info" },
-    chatRoom: { appenders: ["ChatRoom"], level: "info" },
+    SSO: { appenders: ["SSO"], level: "info" },
+    ChatRoom: { appenders: ["ChatRoom"], level: "info" },
   },
 });
 

@@ -3,7 +3,7 @@
  * @Author: 朱晨光
  * @Date: 2023-12-02 20:41:44
  * @LastEditors: cg
- * @LastEditTime: 2024-09-25 17:51:47
+ * @LastEditTime: 2024-12-31 10:20:06
  */
 
 // 引入日志工具
@@ -14,37 +14,42 @@ import { JsonDB, Config } from "node-json-db";
 
 // account库，用于查重名称是否重复
 export const accountId_db = new JsonDB(
-  new Config("./db/accountDataBase", true, false, "/")
+  new Config("./db/sso/accountDataBase", true, false, "/")
 );
 
 // 个人信息数据库
 export const user_db = new JsonDB(
-  new Config("./db/userDataBase", true, false, "/")
+  new Config("./db/sso/userDataBase", true, false, "/")
 );
 
 // 历史记录数据库（用于查询所有账号登录历史 废弃废弃废弃废弃废弃废弃废弃废弃）
-export const history_db = new JsonDB(
-  new Config("./db/historyDataBase", true, false, "/")
-);
+// export const history_db = new JsonDB(
+//   new Config("./db/sso/historyDataBase", true, false, "/")
+// );
 
 // 登录token存储数据库（用于查询token是否失效）
-export const loginToken_db = new JsonDB(
-  new Config("./db/loginTokenDataBase", true, false, "/")
-);
+// export const loginToken_db = new JsonDB(
+//   new Config("./db/sso/loginTokenDataBase", true, false, "/")
+// );
 
-// 登录ticket存储数据库（用于查询ticket是否失效，一次性）
+// 登录ticket存储数据库（用于项目页获取当前项目token，一次性）
 export const ticket_db = new JsonDB(
-  new Config("./db/loginTicketDataBase", true, false, "/")
+  new Config("./db/sso/loginTicketDataBase", true, false, "/")
 );
 
 // 类似sessionId存储数据库
 export const session_db = new JsonDB(
-  new Config("./db/sessionDataBase", true, false, "/")
+  new Config("./db/sso/sessionDataBase", true, false, "/")
 );
 
 // 存储聊天室相关数据
 export const room_db = new JsonDB(
-  new Config("./db/accountDataBase", true, false, "/")
+  new Config("./db/chatRoom/roomDataBase", true, false, "/")
+);
+
+// 存储用户的自由表格相关信息
+export const statement_db = new JsonDB(
+  new Config("./db/statement/statementDataBase", true, false, "/")
 );
 
 import Koa from "koa";
@@ -81,9 +86,14 @@ app.use(handleResStatus); // 对返回code码统一处理
 // 添加日志功能
 app.use(accessLogger());
 
-const server = app.listen(8080, () => {
+const server = app.listen(8888, () => {
   let port = server.address().port;
-  console.log("服务器开启: http://localhost:8080/", port);
+  console.log("服务器开启: http://localhost:8888/", port);
+  console.log("已配置当前环境变量", {
+    ALIBABA_CLOUD_ACCESS_KEY_ID: process.env["ALIBABA_CLOUD_ACCESS_KEY_ID"],
+    ALIBABA_CLOUD_ACCESS_KEY_SECRET:
+      process.env["ALIBABA_CLOUD_ACCESS_KEY_SECRET"],
+  });
 });
 
 // 开启websocket

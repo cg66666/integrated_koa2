@@ -3,20 +3,29 @@
  * @Author: cg
  * @Date: 2023-12-02 21:16:00
  * @LastEditors: cg
- * @LastEditTime: 2024-09-25 16:49:22
+ * @LastEditTime: 2025-01-02 17:26:50
  */
-import { room_db } from "../app.js";
+// x-token 聊天室token
+import {
+  room_db,
+  user_db,
+  accountId_db,
+  loggerSSO,
+  ticket_db,
+  session_db,
+  loggerChatRoom,
+} from "../app.js";
 import koaRouter from "koa-router";
 
 // jwt相关配置
 import jwt from "jsonwebtoken";
 
-// const secret = require("../db/jwt_secret");
 import secret from "../db/jwt_secret.js";
 const room_router = new koaRouter();
 
 // 创建房间
 room_router.post("/create", async (ctx, next) => {
+  if (ctx.fail) return await next();
   const { room, user, password } = ctx.request.body;
   if (await room_db.exists(`/${room}`)) {
     ctx.fail = {
@@ -26,7 +35,11 @@ room_router.post("/create", async (ctx, next) => {
     await room_db.push(`/${room}`, {
       password,
       userList: [user],
-      updataTime: new Date().getTime(),
+      updataTime: Date.now(),
+    });
+    loggerChatRoom.info({
+      msg: `新建房间`,
+      room,
     });
     ctx.success = {
       msg: `房间新建成功！`,
@@ -37,6 +50,7 @@ room_router.post("/create", async (ctx, next) => {
 
 // 加入房间
 room_router.post("/join", async (ctx, next) => {
+  if (ctx.fail) return await next();
   const { room, user, password } = ctx.request.body;
   if (!(await room_db.exists(`/${room}`))) {
     ctx.fail = {
@@ -53,7 +67,7 @@ room_router.post("/join", async (ctx, next) => {
         msg: `该用户名已存在！`,
       };
     } else {
-      roomInfo.updataTime = new Date().getTime();
+      roomInfo.updataTime = Date.now();
       roomInfo.userList.push(user);
       await room_db.push(`/${room}`, roomInfo);
       ctx.success = {
@@ -66,6 +80,7 @@ room_router.post("/join", async (ctx, next) => {
 
 // 离开房间
 room_router.post("/leave", async (ctx, next) => {
+  if (ctx.fail) return await next();
   const { room, user } = ctx.request.body;
   const roomInfo = await room_db.getData(`/${room}`);
   if (roomInfo.userList.length === 1) {
@@ -76,7 +91,7 @@ room_router.post("/leave", async (ctx, next) => {
     if (roomInfo.userList.length === 0) {
       await room_db.delete(`/${room}`);
     } else {
-      roomInfo.updataTime = new Date().getTime();
+      roomInfo.updataTime = Date.now();
       await room_db.push(`/${room}`, roomInfo);
     }
   }
@@ -86,78 +101,116 @@ room_router.post("/leave", async (ctx, next) => {
   await next();
 });
 
-// 获取token
+// 根据ticket获取token
 room_router.post("/getToken", async (ctx, next) => {
+  if (ctx.fail) return await next();
   const { ticket } = ctx.request.body;
-  if (ticket) {
-    // const res = await axios.get(
-    //   "http://localhost:8080/SSO/getUserId?ticket=" + ticket
-    // );
-    // if (res.data.code === "00000") {
-    //   console.log("getToken", res.data.data);
-    //   const token = jwt.sign(
-    //     { id: res.data.data.id, expireTime: res.data.data.expireTime },
-    //     secret
-    //   );
-    //   ctx.cookies.set("X-TOKEN", token, {
-    //     overwrite: true,
-    //     httpOnly: false,
-    //   });
-    //   ctx.success = {
-    //     msg: "登陆成功",
-    //   };
-    // }
-    ctx.success = {
-      msg: "登陆成功",
-    };
-  } else {
+  if (!ticket) {
     ctx.fail = {
-      msg: "传参缺失！",
+      msg: "参数缺失！",
+    };
+  } else if (await ticket_db.exists(`/${ticket}`)) {
+    let data = await ticket_db.getData(`/${ticket}`);
+    if (data.expireTime < Date.now()) {
+      ctx.status = 401;
+      ctx.success = {
+        msg: "登录信息失效！",
+      };
+    } else {
+      const token = jwt.sign(
+        { id: data.id, expireTime: data.expireTime },
+        secret.roomSecret
+      );
+      ctx.cookies.set("X-TOKEN", token, {
+        overwrite: true,
+        httpOnly: false,
+      });
+      ctx.success = {
+        msg: "登陆成功",
+      };
+    }
+    // 删除对应ticket
+    await ticket_db.delete(`/${ticket}`);
+  } else {
+    ctx.status = 401;
+    ctx.success = {
+      msg: "登录信息失效！",
     };
   }
-
-  // console.log('res', res)
   await next();
 });
 
 // 校验token
 room_router.get("/checkToken", async (ctx, next) => {
+  if (ctx.fail) return await next();
   const token = ctx.header["x-token"];
-  console.log("token", token);
-  const handleData = jwt.verify(token, secret.roomSecret);
-
-  // const res = await axios.get(
-  //   "http://localhost:8080/SSO/checkSession?id=" + handleData.id
-  // );
-  // console.log("res", res);
-  // if (!res.data.data.isValidate) {
-  //   ctx.status = 401;
-  //   ctx.success = {
-  //     msg: "登录信息失效！",
-  //   };
-  // } else {
-  //   ctx.success = {
-  //     data: {
-  //       ok: true,
-  //     },
-  //   };
-  // }
-  ctx.success = {
-    data: {
-      ok: true,
-    },
-  };
+  if (token) {
+    const handleData = jwt.verify(token, secret.roomSecret);
+    if (await session_db.exists(`/${handleData.id}`)) {
+      const sessionData = await session_db.getData(`/${handleData.id}`);
+      if (sessionData.expireTime >= Date.now()) {
+        ctx.success = {
+          data: {
+            ok: true,
+          },
+        };
+      }
+    }
+  }
+  if (!ctx.success) {
+    ctx.success = {
+      data: {
+        ok: false,
+      },
+    };
+  }
   await next();
 });
 
 // 获取登录用户信息
-// secret
 room_router.get("/getUserInfo", async (ctx, next) => {
+  if (ctx.fail) return await next();
   const token = ctx.header["x-token"];
-  console.log("token", token);
-  // const res = await axios.get('http://localhost:8080/SSO/getUserInfo?id=1234567')
-  // console.log('res', res)
+  const handleData = jwt.verify(token, secret.roomSecret);
+  if (await user_db.exists(`/${handleData.id}`)) {
+    const data = await user_db.getData(`/${handleData.id}`);
+    ctx.success = {
+      msg: "登录信息失效！",
+      data: {
+        name: data.userName,
+      },
+    };
+  } else {
+    ctx.status = 401;
+    ctx.success = {
+      msg: "登录信息失效！",
+    };
+  }
+  await next();
+});
 
+// 全局退出登录
+room_router.get("/logout", async (ctx, next) => {
+  if (ctx.fail) return await next();
+  const token = ctx.header["x-token"];
+  if (!token) {
+    ctx.success = {
+      msg: "退出登陆成功！",
+    };
+  } else {
+    const handleData = jwt.verify(token, secret.roomSecret);
+    await session_db.delete(`/${handleData.id}`);
+    // 清空名cookie
+    ctx.cookies.set("X-TOKEN", "", {
+      // 设置过期时间为过去的一个时间点，这会让浏览器立即删除这个 cookie
+      expires: new Date(1), // 或者使用 maxAge: -1
+      overwrite: true,
+      httpOnly: false,
+    });
+    ctx.success = {
+      msg: "退出登陆成功！",
+    };
+  }
   await next();
 });
 

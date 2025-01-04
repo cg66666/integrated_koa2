@@ -1,9 +1,15 @@
 {
   "scripts": {
-    "server": "nodemon app.js"
+    "server": "nodemon app.js",
+    "clear": "node clear.js"
   },
   "type": "module",
   "dependencies": {
+    "@alicloud/dysmsapi20170525": "3.0.0",
+    "@alicloud/openapi-client": "^0.4.12",
+    "@alicloud/tea-console": "^1.0.0",
+    "@alicloud/tea-util": "^1.4.9",
+    "cgcg666_cli": "^1.0.5",
     "jsonwebtoken": "^9.0.2",
     "koa": "^2.14.2",
     "koa-body": "^6.0.1",
