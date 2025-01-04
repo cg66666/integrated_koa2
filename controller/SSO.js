@@ -3,7 +3,7 @@
  * @Author: 朱晨光
  * @Date: 2023-12-05 09:03:42
  * @LastEditors: cg
- * @LastEditTime: 2025-01-05 04:50:27
+ * @LastEditTime: 2025-01-05 05:02:55
  */
 import Dysmsapi20170525 from "@alicloud/dysmsapi20170525";
 import OpenApi from "@alicloud/openapi-client";
@@ -374,10 +374,10 @@ SSO_router.get("/phone/postCaptcha", veriftSSOToken, async (ctx, next) => {
     );
 
     let config = new OpenApi.Config({
-      // 必填，请确保代码运行环境设置了环境变量 ALIBABA_CLOUD_KEY
-      accessKeyId: process.env["ALIBABA_CLOUD_KEY"],
-      // 必填，请确保代码运行环境设置了环境变量 ALIBABA_CLOUD_SECRET
-      accessKeySecret: process.env["ALIBABA_CLOUD_SECRET"],
+      // 必填，请确保代码运行环境设置了环境变量 DATABASE_KEY
+      accessKeyId: process.env["DATABASE_KEY"],
+      // 必填，请确保代码运行环境设置了环境变量 DATABASE_SECRET
+      accessKeySecret: process.env["DATABASE_SECRET"],
       // Endpoint 请参考 https://api.aliyun.com/product/Dysmsapi
       endpoint: `dysmsapi.aliyuncs.com`,
     });
