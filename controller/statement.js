@@ -3,7 +3,7 @@
  * @Author: cg
  * @Date: 2024-12-27 14:24:23
  * @LastEditors: cg
- * @LastEditTime: 2025-01-02 17:23:30
+ * @LastEditTime: 2025-01-07 17:51:28
  */
 // s-token 自由表单token
 import koaRouter from "koa-router";
@@ -101,13 +101,13 @@ statement_router.get("/getUserInfo", async (ctx, next) => {
 
   if (await user_db.exists(`/${handleData.id}`)) {
     const data = await user_db.getData(`/${handleData.id}`);
-    console.log(111, data);
+    // console.log(111, data);
     let config = null;
     if (await statement_db.exists(`/${handleData.id}`)) {
       config = await statement_db.getData(`/${handleData.id}`);
     }
     ctx.success = {
-      msg: "登录信息失效！",
+      msg: "success",
       data: {
         name: data.userName,
         config,
