@@ -3,7 +3,7 @@
  * @Author: 朱晨光
  * @Date: 2023-12-02 21:16:00
  * @LastEditors: cg
- * @LastEditTime: 2025-04-10 01:59:11
+ * @LastEditTime: 2025-04-10 02:02:33
  */
 // t-token markdown页token
 import koaRouter from "koa-router";
@@ -152,38 +152,38 @@ tiptap_router.get("/logout", async (ctx, next) => {
   await next();
 });
 
-// tiptap_router.post("/saveData", async (ctx, next) => {
-//   if (ctx.fail) return await next();
-//   const { data } = ctx.request.body;
-//   try {
-//     await tiptap_db.push("/data", data);
-//     ctx.success = {
-//       msg: "保存成功",
-//     };
-//   } catch {
-//     ctx.success = {
-//       msg: "保存失败",
-//     };
-//   }
-//   await next();
-// });
-
-tiptap_router.get("/getData", async (ctx, next) => {
+tiptap_router.post("/saveData", async (ctx, next) => {
   if (ctx.fail) return await next();
   const { data } = ctx.request.body;
   try {
-    const data = await tiptap_db.getData("/data");
+    await tiptap_db.push("/data", data);
     ctx.success = {
       msg: "保存成功",
-      data
     };
   } catch {
-    ctx.fail = {
-      msg: "获取失败",
+    ctx.success = {
+      msg: "保存失败",
     };
   }
   await next();
 });
+
+// tiptap_router.get("/getData", async (ctx, next) => {
+//   if (ctx.fail) return await next();
+//   const { data } = ctx.request.body;
+//   try {
+//     const data = await tiptap_db.getData("/data");
+//     ctx.success = {
+//       msg: "保存成功",
+//       data
+//     };
+//   } catch {
+//     ctx.fail = {
+//       msg: "获取失败",
+//     };
+//   }
+//   await next();
+// });
 
 // console.log("inner", router_login.routes);
 export default tiptap_router;
