@@ -3,7 +3,7 @@
  * @Author: 朱晨光
  * @Date: 2023-12-02 21:16:00
  * @LastEditors: cg
- * @LastEditTime: 2025-04-10 02:19:57
+ * @LastEditTime: 2025-04-10 02:22:40
  */
 // t-token markdown页token
 import koaRouter from "koa-router";
@@ -171,22 +171,16 @@ tiptap_router.post("/saveData", async (ctx, next) => {
 // 获取登录用户信息
 tiptap_router.get("/getData", async (ctx, next) => {
   if (ctx.fail) return await next();
-  const token = ctx.header["t-token"];
+  const { data } = ctx.request.body;
   try {
-    const handleData = jwt.verify(token, secret.tiptapSecret);
-    if (await user_db.exists(`/${handleData.id}`)) {
-      const data = await user_db.getData(`/${handleData.id}`);
-      ctx.success = {
-        msg: "success",
-        data: {
-          name: data.userName,
-        },
-      };
-    }
-  } catch {
-    ctx.status = 401;
+    const data = await tiptap_db.getData("/data");
     ctx.success = {
-      msg: "登录信息失效！",
+      msg: "保存成功",
+      data
+    };
+  } catch {
+    ctx.fail = {
+      msg: "获取失败",
     };
   }
   await next();
