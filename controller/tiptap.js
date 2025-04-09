@@ -3,7 +3,7 @@
  * @Author: 朱晨光
  * @Date: 2023-12-02 21:16:00
  * @LastEditors: cg
- * @LastEditTime: 2025-04-09 18:47:15
+ * @LastEditTime: 2025-04-09 18:54:55
  */
 // t-token markdown页token
 import koaRouter from "koa-router";
@@ -91,8 +91,6 @@ tiptap_router.get("/checkToken", async (ctx, next) => {
         };
       }
     } catch {
-      console.log(444, ctx.fail);
-
       ctx.success = {
         data: {
           ok: false,
