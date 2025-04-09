@@ -101,56 +101,56 @@ tiptap_router.get("/checkToken", async (ctx, next) => {
   await next();
 });
 
-// // 获取登录用户信息
-// tiptap_router.get("/getUserInfo", async (ctx, next) => {
-//   if (ctx.fail) return await next();
-//   const token = ctx.header["t-token"];
-//   try {
-//     const handleData = jwt.verify(token, secret.tiptapSecret);
-//     if (await user_db.exists(`/${handleData.id}`)) {
-//       const data = await user_db.getData(`/${handleData.id}`);
-//       ctx.success = {
-//         msg: "success",
-//         data: {
-//           name: data.userName,
-//         },
-//       };
-//     }
-//   } catch {
-//     ctx.status = 401;
-//     ctx.success = {
-//       msg: "登录信息失效！",
-//     };
-//   }
-//   await next();
-// });
+// 获取登录用户信息
+tiptap_router.get("/getUserInfo", async (ctx, next) => {
+  if (ctx.fail) return await next();
+  const token = ctx.header["t-token"];
+  try {
+    const handleData = jwt.verify(token, secret.tiptapSecret);
+    if (await user_db.exists(`/${handleData.id}`)) {
+      const data = await user_db.getData(`/${handleData.id}`);
+      ctx.success = {
+        msg: "success",
+        data: {
+          name: data.userName,
+        },
+      };
+    }
+  } catch {
+    ctx.status = 401;
+    ctx.success = {
+      msg: "登录信息失效！",
+    };
+  }
+  await next();
+});
 
-// // 全局退出登录
-// tiptap_router.get("/logout", async (ctx, next) => {
-//   if (ctx.fail) return await next();
-//   const token = ctx.header["s-token"];
-//   if (!token) {
-//     ctx.success = {
-//       msg: "退出登陆成功！",
-//     };
-//   } else {
-//     try {
-//       const handleData = jwt.verify(token, secret.tiptapSecret);
-//       await session_db.delete(`/${handleData.id}`);
-//     } catch {}
-//     ctx.success = {
-//       msg: "退出登陆成功！",
-//     };
-//     // 清空名cookie
-//     ctx.cookies.set("T-TOKEN", "", {
-//       // 设置过期时间为过去的一个时间点，这会让浏览器立即删除这个 cookie
-//       expires: new Date(1), // 或者使用 maxAge: -1
-//       overwrite: true,
-//       httpOnly: false,
-//     });
-//   }
-//   await next();
-// });
+// 全局退出登录
+tiptap_router.get("/logout", async (ctx, next) => {
+  if (ctx.fail) return await next();
+  const token = ctx.header["s-token"];
+  if (!token) {
+    ctx.success = {
+      msg: "退出登陆成功！",
+    };
+  } else {
+    try {
+      const handleData = jwt.verify(token, secret.tiptapSecret);
+      await session_db.delete(`/${handleData.id}`);
+    } catch {}
+    ctx.success = {
+      msg: "退出登陆成功！",
+    };
+    // 清空名cookie
+    ctx.cookies.set("T-TOKEN", "", {
+      // 设置过期时间为过去的一个时间点，这会让浏览器立即删除这个 cookie
+      expires: new Date(1), // 或者使用 maxAge: -1
+      overwrite: true,
+      httpOnly: false,
+    });
+  }
+  await next();
+});
 
 // tiptap_router.post("/saveData", async (ctx, next) => {
 //   if (ctx.fail) return await next();
