@@ -3,7 +3,7 @@
  * @Author: cg
  * @Date: 2023-12-02 21:16:00
  * @LastEditors: cg
- * @LastEditTime: 2025-01-02 17:26:50
+ * @LastEditTime: 2025-04-09 18:40:49
  */
 // x-token 聊天室token
 import {
@@ -145,17 +145,25 @@ room_router.get("/checkToken", async (ctx, next) => {
   if (ctx.fail) return await next();
   const token = ctx.header["x-token"];
   if (token) {
-    const handleData = jwt.verify(token, secret.roomSecret);
-    if (await session_db.exists(`/${handleData.id}`)) {
-      const sessionData = await session_db.getData(`/${handleData.id}`);
-      if (sessionData.expireTime >= Date.now()) {
+    let handleData;
+    try {
+      handleData = jwt.verify(token, secret.roomSecret);
+      if (await session_db.exists(`/${handleData.id}`)) {
+        const sessionData = await session_db.getData(`/${handleData.id}`);
+        if (sessionData.expireTime >= Date.now()) {
+          ctx.success = {
+            data: {
+              ok: true,
+            },
+          };
+        }
+      }else{
+        ctx.status = 401;
         ctx.success = {
-          data: {
-            ok: true,
-          },
+          msg: "登录信息失效！",
         };
       }
-    }
+    } catch {}
   }
   if (!ctx.success) {
     ctx.success = {
@@ -171,21 +179,25 @@ room_router.get("/checkToken", async (ctx, next) => {
 room_router.get("/getUserInfo", async (ctx, next) => {
   if (ctx.fail) return await next();
   const token = ctx.header["x-token"];
-  const handleData = jwt.verify(token, secret.roomSecret);
-  if (await user_db.exists(`/${handleData.id}`)) {
-    const data = await user_db.getData(`/${handleData.id}`);
-    ctx.success = {
-      msg: "登录信息失效！",
-      data: {
-        name: data.userName,
-      },
-    };
-  } else {
-    ctx.status = 401;
-    ctx.success = {
-      msg: "登录信息失效！",
-    };
-  }
+  let handleData;
+  try {
+    handleData = jwt.verify(token, secret.roomSecret);
+    if (await user_db.exists(`/${handleData.id}`)) {
+      const data = await user_db.getData(`/${handleData.id}`);
+      ctx.success = {
+        msg: "登录信息失效！",
+        data: {
+          name: data.userName,
+        },
+      };
+    } else {
+      ctx.status = 401;
+      ctx.success = {
+        msg: "登录信息失效！",
+      };
+    }
+  } catch {}
+
   await next();
 });
 
@@ -198,8 +210,11 @@ room_router.get("/logout", async (ctx, next) => {
       msg: "退出登陆成功！",
     };
   } else {
-    const handleData = jwt.verify(token, secret.roomSecret);
-    await session_db.delete(`/${handleData.id}`);
+    let handleData;
+    try {
+      handleData = jwt.verify(token, secret.roomSecret);
+      await session_db.delete(`/${handleData.id}`);
+    } catch {}
     // 清空名cookie
     ctx.cookies.set("X-TOKEN", "", {
       // 设置过期时间为过去的一个时间点，这会让浏览器立即删除这个 cookie
