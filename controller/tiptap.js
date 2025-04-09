@@ -1,22 +1,21 @@
 /*
- * @Description: file content
- * @Author: cg
- * @Date: 2024-12-27 14:24:23
+ * @Description: 测试
+ * @Author: 朱晨光
+ * @Date: 2023-12-02 21:16:00
  * @LastEditors: cg
- * @LastEditTime: 2025-04-07 15:38:39
+ * @LastEditTime: 2025-04-07 16:00:48
  */
-// s-token 自由表单token
+// t-token markdown页token
 import koaRouter from "koa-router";
-import { user_db, ticket_db, session_db, statement_db } from "../app.js";
+import { user_db, ticket_db, session_db, tiptap_db } from "../app.js";
 // jwt相关配置
 import jwt from "jsonwebtoken";
 
 import secret from "../db/jwt_secret.js";
-
-const statement_router = new koaRouter();
+const tiptap_router = new koaRouter();
 
 // 根据ticket获取token
-statement_router.post("/getToken", async (ctx, next) => {
+tiptap_router.post("/getToken", async (ctx, next) => {
   if (ctx.fail) return await next();
   const { ticket } = ctx.request.body;
   if (!ticket) {
@@ -33,10 +32,10 @@ statement_router.post("/getToken", async (ctx, next) => {
     } else {
       const token = jwt.sign(
         { id: data.id, expireTime: data.expireTime },
-        secret.statementSecret
+        secret.tiptapSecret
       );
 
-      ctx.cookies.set("S-TOKEN", token, {
+      ctx.cookies.set("T-TOKEN", token, {
         overwrite: true,
         httpOnly: false,
       });
@@ -44,8 +43,11 @@ statement_router.post("/getToken", async (ctx, next) => {
         msg: "登陆成功",
       };
     }
-    // 删除对应ticket
-    await ticket_db.delete(`/${ticket}`);
+    // 解决开发模式问题
+    setTimeout(() => {
+      // 删除对应ticket
+      ticket_db.delete(`/${ticket}`);
+    }, 1000);
   } else {
     ctx.status = 401;
     ctx.success = {
@@ -57,10 +59,9 @@ statement_router.post("/getToken", async (ctx, next) => {
 });
 
 // 校验token
-statement_router.get("/checkToken", async (ctx, next) => {
+tiptap_router.get("/checkToken", async (ctx, next) => {
   if (ctx.fail) return await next();
-  const token = ctx.header["s-token"];
-
+  const token = ctx.header["t-token"];
   if (!token) {
     ctx.status = 401;
     ctx.success = {
@@ -68,7 +69,7 @@ statement_router.get("/checkToken", async (ctx, next) => {
     };
   } else {
     try {
-      const handleData = jwt.verify(token, secret.statementSecret);
+      const handleData = jwt.verify(token, secret.tiptapSecret);
       if (await session_db.exists(`/${handleData.id}`)) {
         const sessionData = await session_db.getData(`/${handleData.id}`);
         if (sessionData.expireTime >= Date.now()) {
@@ -90,6 +91,8 @@ statement_router.get("/checkToken", async (ctx, next) => {
         };
       }
     } catch {
+      console.log(444, ctx.fail);
+
       ctx.success = {
         data: {
           ok: false,
@@ -101,24 +104,17 @@ statement_router.get("/checkToken", async (ctx, next) => {
 });
 
 // 获取登录用户信息
-statement_router.get("/getUserInfo", async (ctx, next) => {
+tiptap_router.get("/getUserInfo", async (ctx, next) => {
   if (ctx.fail) return await next();
-  const token = ctx.header["s-token"];
+  const token = ctx.header["t-token"];
   try {
-    const handleData = jwt.verify(token, secret.statementSecret);
-
+    const handleData = jwt.verify(token, secret.tiptapSecret);
     if (await user_db.exists(`/${handleData.id}`)) {
       const data = await user_db.getData(`/${handleData.id}`);
-      // console.log(111, data);
-      let config = null;
-      if (await statement_db.exists(`/${handleData.id}`)) {
-        config = await statement_db.getData(`/${handleData.id}`);
-      }
       ctx.success = {
         msg: "success",
         data: {
           name: data.userName,
-          config,
         },
       };
     }
@@ -132,7 +128,7 @@ statement_router.get("/getUserInfo", async (ctx, next) => {
 });
 
 // 全局退出登录
-statement_router.get("/logout", async (ctx, next) => {
+tiptap_router.get("/logout", async (ctx, next) => {
   if (ctx.fail) return await next();
   const token = ctx.header["s-token"];
   if (!token) {
@@ -141,14 +137,14 @@ statement_router.get("/logout", async (ctx, next) => {
     };
   } else {
     try {
-      const handleData = jwt.verify(token, secret.statementSecret);
+      const handleData = jwt.verify(token, secret.tiptapSecret);
       await session_db.delete(`/${handleData.id}`);
-      ctx.success = {
-        msg: "退出登陆成功！",
-      };
     } catch {}
+    ctx.success = {
+      msg: "退出登陆成功！",
+    };
     // 清空名cookie
-    ctx.cookies.set("S-TOKEN", "", {
+    ctx.cookies.set("T-TOKEN", "", {
       // 设置过期时间为过去的一个时间点，这会让浏览器立即删除这个 cookie
       expires: new Date(1), // 或者使用 maxAge: -1
       overwrite: true,
@@ -158,23 +154,38 @@ statement_router.get("/logout", async (ctx, next) => {
   await next();
 });
 
-// 保存对应用户表格编辑内容
-statement_router.post("/saveTable", async (ctx, next) => {
+tiptap_router.post("/saveData", async (ctx, next) => {
   if (ctx.fail) return await next();
-  const { config } = ctx.request.body;
-  const token = ctx.header["s-token"];
+  const { data } = ctx.request.body;
   try {
-    const handleData = jwt.verify(token, secret.statementSecret);
-    await statement_db.push(`/${handleData.id}`, config);
+    await tiptap_db.push("/data", data);
     ctx.success = {
-      msg: `保存成功！`,
+      msg: "保存成功",
     };
   } catch {
-    ctx.fail = {
-      msg: `保存失败！`,
+    ctx.success = {
+      msg: "保存失败",
     };
   }
   await next();
 });
 
-export default statement_router;
+tiptap_router.get("/getData", async (ctx, next) => {
+  if (ctx.fail) return await next();
+  const { data } = ctx.request.body;
+  try {
+    const data = await tiptap_db.getData("/data");
+    ctx.success = {
+      msg: "保存成功",
+      data
+    };
+  } catch {
+    ctx.fail = {
+      msg: "获取失败",
+    };
+  }
+  await next();
+});
+
+// console.log("inner", router_login.routes);
+export default tiptap_router;

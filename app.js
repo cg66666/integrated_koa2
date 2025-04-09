@@ -3,7 +3,7 @@
  * @Author: 朱晨光
  * @Date: 2023-12-02 20:41:44
  * @LastEditors: cg
- * @LastEditTime: 2024-12-31 10:20:06
+ * @LastEditTime: 2025-04-07 15:08:24
  */
 
 // 引入日志工具
@@ -52,10 +52,18 @@ export const statement_db = new JsonDB(
   new Config("./db/statement/statementDataBase", true, false, "/")
 );
 
+// 存储tiptap文档内容
+export const tiptap_db = new JsonDB(
+  new Config("./db/tiptap/totalData", true, false, "/")
+);
+
 import Koa from "koa";
 
 // 请求体处理
 import { koaBody } from "koa-body";
+
+// gzip压缩
+import compress from "koa-compress";
 
 // 路由集成
 import router from "./controller/index.js";
@@ -76,6 +84,14 @@ schedule();
 const app = new Koa();
 
 app.use(koaBody()); // 获取body上的内容
+
+// 使用 koa-compress 压缩响应体
+app.use(
+  compress({
+    threshold: 1024 * 2, // 只有响应体大于 1KB 才进行压缩
+    br: false, // disable brotli
+  })
+);
 
 app.use(router.routes()); // 添加路由中间件
 

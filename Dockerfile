@@ -16,7 +16,6 @@ RUN npm install -g pm2
 # 安装依赖
 RUN npm install
 
-
 # 暴露端口
 EXPOSE 8888
 

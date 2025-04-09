@@ -3,7 +3,7 @@
  * @Author: cg
  * @Date: 2024-12-29 17:15:09
  * @LastEditors: cg
- * @LastEditTime: 2024-12-29 17:29:32
+ * @LastEditTime: 2025-04-09 15:12:04
  */
 import fs from "fs/promises";
 import path from "path";
@@ -16,18 +16,17 @@ const deleteFilesInDirectory = async (directoryPath) => {
     for (const file of files) {
       const filePath = path.join(directoryPath, file);
       const stats = await fs.stat(filePath);
-
       // 如果是文件且扩展名为.json或.log，则删除该文件
       if (
         stats.isFile() &&
         (path.extname(file) === ".json" || path.extname(file) === ".log")
       ) {
-        console.log(`Deleting file: ${filePath}`);
         await fs.unlink(filePath);
-        console.log(`Deleted file: ${filePath}`);
       }
       // 如果是目录，则递归调用此函数处理子目录
       else if (stats.isDirectory()) {
+        // 特殊处理tiptap数据库不删除
+        if(file == 'tiptap') return
         await deleteFilesInDirectory(filePath);
       }
     }
