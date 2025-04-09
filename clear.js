@@ -3,7 +3,7 @@
  * @Author: cg
  * @Date: 2024-12-29 17:15:09
  * @LastEditors: cg
- * @LastEditTime: 2024-12-29 17:29:32
+ * @LastEditTime: 2025-04-09 18:30:04
  */
 import fs from "fs/promises";
 import path from "path";
@@ -28,6 +28,8 @@ const deleteFilesInDirectory = async (directoryPath) => {
       }
       // 如果是目录，则递归调用此函数处理子目录
       else if (stats.isDirectory()) {
+        // 特殊处理tiptap数据库不删除
+        if (file == "tiptap") return;
         await deleteFilesInDirectory(filePath);
       }
     }

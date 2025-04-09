@@ -3,7 +3,7 @@
  * @Author: 朱晨光
  * @Date: 2023-12-05 09:03:42
  * @LastEditors: cg
- * @LastEditTime: 2025-01-05 05:02:55
+ * @LastEditTime: 2025-04-09 18:31:11
  */
 import Dysmsapi20170525 from "@alicloud/dysmsapi20170525";
 import OpenApi from "@alicloud/openapi-client";
@@ -48,8 +48,8 @@ SSO_router.post("/getLogingToken", async (ctx, next) => {
   // 判断状态（是否为登录状态）
   if (ssoToken) {
     //如果保持登录状态，则无感延长登陆时间
-    const handleToken = jwt.verify(ssoToken, secret.userSecret);
-    if (await session_db.exists(`/${handleToken.id}`)) {
+    try {
+      const handleToken = jwt.verify(ssoToken, secret.userSecret);
       const sessionData = await session_db.getData(`/${handleToken.id}`);
       // 判断是否过期
       if (sessionData.expireTime >= Date.now()) {
@@ -105,7 +105,7 @@ SSO_router.post("/getLogingToken", async (ctx, next) => {
           data: { loginingToken, svg: captcha.data },
         };
       }
-    } else {
+    } catch {
       ctx.cookies.set("SSO-TOKEN", "", { maxAge: -1000 });
       // const tokenUniqueId = await produceToken();
       // 生成验证码
@@ -131,19 +131,13 @@ SSO_router.post("/getLogingToken", async (ctx, next) => {
     // let prevTokenUniqueId;
     // redirectUrl参数优先于prevToken，此时需要取出旧token中的redirectUrl，如果token过期，redirectUrl将丢失
     if (prevToken) {
-      const decryptToken = jwt.verify(prevToken, secret.loginingSecret);
       if (!redirectUrl) {
-        redirectUrl = decryptToken.redirectUrl;
+        try {
+          const decryptToken = jwt.verify(prevToken, secret.loginingSecret);
+          redirectUrl = decryptToken.redirectUrl;
+        } catch {}
       }
-      // 删除旧token
-      // prevTokenUniqueId = decryptToken.tokenUniqueId;
-      // if (await loginToken_db.exists(`/${prevTokenUniqueId}`)) {
-      //   loginToken_db.delete(`/${prevTokenUniqueId}`);
-      // }
     }
-
-    // const tokenUniqueId = await produceToken();
-
     // 生成验证码
     const captcha = svgCaptcha.create({
       size: 4, // 验证码长度
