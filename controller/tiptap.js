@@ -169,7 +169,7 @@ tiptap_router.post("/saveData", async (ctx, next) => {
 });
 
 // 获取登录用户信息
-tiptap_router.get("/getUserInfo2", async (ctx, next) => {
+tiptap_router.get("/getData", async (ctx, next) => {
   if (ctx.fail) return await next();
   const token = ctx.header["t-token"];
   try {
