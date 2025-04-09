@@ -169,6 +169,22 @@ tiptap_router.post("/saveData", async (ctx, next) => {
 });
 
 // 获取登录用户信息
+// tiptap_router.get("/getData", async (ctx, next) => {
+//   if (ctx.fail) return await next();
+//   try {
+//     const data = await tiptap_db.getData("/data");
+//     ctx.success = {
+//       msg: "保存成功",
+//       data
+//     };
+//   } catch {
+//     ctx.fail = {
+//       msg: "获取失败",
+//     };
+//   }
+//   await next();
+// });
+
 tiptap_router.get("/getData", async (ctx, next) => {
   if (ctx.fail) return await next();
   const { data } = ctx.request.body;
