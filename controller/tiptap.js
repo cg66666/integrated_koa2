@@ -168,23 +168,29 @@ tiptap_router.post("/saveData", async (ctx, next) => {
   await next();
 });
 
-tiptap_router.get("/getData2", async (ctx, next) => {
+tiptap_router.get("/getData", async (ctx, next) => {
   if (ctx.fail) return await next();
-  // try {
-  //   const data = await tiptap_db.getData("/data");
-  //   ctx.success = {
-  //     msg: "保存成功",
-  //     data
-  //   };
-  // } catch {
-  //   ctx.fail = {
-  //     msg: "获取失败",
-  //   };
-  // }
-  // ctx.success = {
-  //   msg: "保存成功",
-  //   data
-  // };
+  const token = ctx.header["s-token"];
+  if (!token) {
+    ctx.success = {
+      msg: "退出登陆成功！",
+    };
+  } else {
+    try {
+      const handleData = jwt.verify(token, secret.tiptapSecret);
+      await session_db.delete(`/${handleData.id}`);
+    } catch {}
+    ctx.success = {
+      msg: "退出登陆成功！",
+    };
+    // 清空名cookie
+    ctx.cookies.set("T-TOKEN", "", {
+      // 设置过期时间为过去的一个时间点，这会让浏览器立即删除这个 cookie
+      expires: new Date(1), // 或者使用 maxAge: -1
+      overwrite: true,
+      httpOnly: false,
+    });
+  }
   await next();
 });
 
