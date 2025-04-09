@@ -3,7 +3,7 @@
  * @Author: 朱晨光
  * @Date: 2023-12-02 20:41:44
  * @LastEditors: cg
- * @LastEditTime: 2025-04-07 15:08:24
+ * @LastEditTime: 2025-04-09 16:49:44
  */
 
 // 引入日志工具
@@ -86,12 +86,12 @@ const app = new Koa();
 app.use(koaBody()); // 获取body上的内容
 
 // 使用 koa-compress 压缩响应体
-app.use(
-  compress({
-    threshold: 1024 * 2, // 只有响应体大于 1KB 才进行压缩
-    br: false, // disable brotli
-  })
-);
+// app.use(
+//   compress({
+//     threshold: 1024 * 2, // 只有响应体大于 1KB 才进行压缩
+//     br: false, // disable brotli
+//   })
+// );
 
 app.use(router.routes()); // 添加路由中间件
 
