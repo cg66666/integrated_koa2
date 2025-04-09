@@ -5,9 +5,16 @@
  * @LastEditors: cg
  * @LastEditTime: 2024-12-27 16:24:16
  */
+
 export default {
+  // 用于生成登录页的临时token，与验证码挂钩
   loginingSecret: "IruD_^3RT#*",
+  // 用于生成登录页的token
   userSecret: "Jwt%._CYweb#",
+  // 用于生成房间页的token
   roomSecret: "84c2a7f39b4d6e7f",
+  // 用于生成自由表单页内容
   statementSecret: "27X1_ryRvDJ9.eyJpZ",
+  // 用于生成tiptap页的token
+  tiptapSecret:"rG842Cw_43g3Ed.e1G"
 };
