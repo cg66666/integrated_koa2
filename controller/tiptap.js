@@ -3,7 +3,7 @@
  * @Author: 朱晨光
  * @Date: 2023-12-02 21:16:00
  * @LastEditors: cg
- * @LastEditTime: 2025-04-09 18:54:55
+ * @LastEditTime: 2025-04-10 01:55:14
  */
 // t-token markdown页token
 import koaRouter from "koa-router";
@@ -59,47 +59,47 @@ tiptap_router.post("/getToken", async (ctx, next) => {
 });
 
 // // 校验token
-// tiptap_router.get("/checkToken", async (ctx, next) => {
-//   if (ctx.fail) return await next();
-//   const token = ctx.header["t-token"];
-//   if (!token) {
-//     ctx.status = 401;
-//     ctx.success = {
-//       msg: "登录信息失效！",
-//     };
-//   } else {
-//     try {
-//       const handleData = jwt.verify(token, secret.tiptapSecret);
-//       if (await session_db.exists(`/${handleData.id}`)) {
-//         const sessionData = await session_db.getData(`/${handleData.id}`);
-//         if (sessionData.expireTime >= Date.now()) {
-//           ctx.success = {
-//             data: {
-//               ok: true,
-//             },
-//           };
-//         } else {
-//           ctx.status = 401;
-//           ctx.success = {
-//             msg: "登录信息失效！",
-//           };
-//         }
-//       } else {
-//         ctx.status = 401;
-//         ctx.success = {
-//           msg: "登录信息失效！",
-//         };
-//       }
-//     } catch {
-//       ctx.success = {
-//         data: {
-//           ok: false,
-//         },
-//       };
-//     }
-//   }
-//   await next();
-// });
+tiptap_router.get("/checkToken", async (ctx, next) => {
+  if (ctx.fail) return await next();
+  const token = ctx.header["t-token"];
+  if (!token) {
+    ctx.status = 401;
+    ctx.success = {
+      msg: "登录信息失效！",
+    };
+  } else {
+    try {
+      const handleData = jwt.verify(token, secret.tiptapSecret);
+      if (await session_db.exists(`/${handleData.id}`)) {
+        const sessionData = await session_db.getData(`/${handleData.id}`);
+        if (sessionData.expireTime >= Date.now()) {
+          ctx.success = {
+            data: {
+              ok: true,
+            },
+          };
+        } else {
+          ctx.status = 401;
+          ctx.success = {
+            msg: "登录信息失效！",
+          };
+        }
+      } else {
+        ctx.status = 401;
+        ctx.success = {
+          msg: "登录信息失效！",
+        };
+      }
+    } catch {
+      ctx.success = {
+        data: {
+          ok: false,
+        },
+      };
+    }
+  }
+  await next();
+});
 
 // // 获取登录用户信息
 // tiptap_router.get("/getUserInfo", async (ctx, next) => {
