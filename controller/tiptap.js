@@ -3,7 +3,7 @@
  * @Author: 朱晨光
  * @Date: 2023-12-02 21:16:00
  * @LastEditors: cg
- * @LastEditTime: 2025-04-10 17:15:55
+ * @LastEditTime: 2025-04-10 22:10:59
  */
 // t-token markdown页token
 import koaRouter from "koa-router";
@@ -130,7 +130,7 @@ tiptap_router.get("/getUserInfo", async (ctx, next) => {
 // 全局退出登录
 tiptap_router.get("/logout", async (ctx, next) => {
   if (ctx.fail) return await next();
-  const token = ctx.header["s-token"];
+  const token = ctx.header["t-token"];
   if (!token) {
     ctx.success = {
       msg: "退出登陆成功！",

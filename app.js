@@ -86,12 +86,12 @@ const app = new Koa();
 app.use(koaBody()); // 获取body上的内容
 
 // 使用 koa-compress 压缩响应体
-// app.use(
-//   compress({
-//     threshold: 1024 * 2, // 只有响应体大于 1KB 才进行压缩
-//     br: false, // disable brotli
-//   })
-// );
+app.use(
+  compress({
+    threshold: 1024 * 2, // 只有响应体大于 1KB 才进行压缩
+    br: false, // disable brotli
+  })
+);
 
 app.use(router.routes()); // 添加路由中间件
 
