@@ -3,7 +3,7 @@
  * @Author: 朱晨光
  * @Date: 2023-12-02 21:16:00
  * @LastEditors: cg
- * @LastEditTime: 2025-04-10 02:29:09
+ * @LastEditTime: 2025-04-10 14:19:28
  */
 // t-token markdown页token
 import koaRouter from "koa-router";
@@ -192,7 +192,6 @@ tiptap_router.get("/getData", async (ctx, next) => {
   try {
     const data = await tiptap_db.getData("/data");
     ctx.success = {
-      msg: "保存成功",
       data,
     };
   } catch {
