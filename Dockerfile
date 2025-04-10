@@ -14,7 +14,7 @@ RUN npm config set registry https://registry.npmmirror.com/
 RUN npm i pnpm -g
 
 # 安装依赖pm2
-RUN pnpm install -g pm2
+RUN npm install -g pm2
 
 # 安装依赖
 RUN pnpm install
