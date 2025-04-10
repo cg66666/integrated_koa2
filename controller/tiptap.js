@@ -3,15 +3,15 @@
  * @Author: 朱晨光
  * @Date: 2023-12-02 21:16:00
  * @LastEditors: cg
- * @LastEditTime: 2025-04-10 16:30:10
+ * @LastEditTime: 2025-04-10 17:15:55
  */
 // t-token markdown页token
 import koaRouter from "koa-router";
-import { user_db, ticket_db, session_db, tiptap_db } from "./app.js";
+import { user_db, ticket_db, session_db, tiptap_db } from "../app.js";
 // jwt相关配置
 import jwt from "jsonwebtoken";
 
-import secret from "./db/jwt_secret.js";
+import secret from "../db/jwt_secret.js";
 const tiptap_router = new koaRouter();
 
 // 根据ticket获取token
