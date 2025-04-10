@@ -11,13 +11,7 @@ COPY . .
 RUN npm config set registry https://registry.npmmirror.com/
 
 # 安装依赖pm2
-RUN npm i pnpm -g
-
-# 安装依赖pm2
 RUN npm install -g pm2
-
-# 安装依赖
-RUN pnpm install
 
 # 暴露端口
 EXPOSE 8888
