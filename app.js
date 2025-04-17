@@ -3,7 +3,7 @@
  * @Author: 朱晨光
  * @Date: 2023-12-02 20:41:44
  * @LastEditors: cg
- * @LastEditTime: 2025-04-09 16:49:44
+ * @LastEditTime: 2025-04-17 08:10:14
  */
 
 // 引入日志工具
@@ -77,11 +77,23 @@ import ws from "./ws/index.js";
 // 日志工具
 import { accessLogger } from "./app.js";
 
+import path from 'path';
+
+import { fileURLToPath } from "url";
+
+import staticMiddleware from 'koa-static';
+
 // 加载定时期插件
 import schedule from "./db/schedule.js";
 schedule();
 
 const app = new Koa();
+
+// 设置静态资源目录
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const staticPath = path.join(__dirname, "public"); // 假设静态资源存放在 public 目录
+app.use(staticMiddleware(staticPath));
 
 app.use(koaBody()); // 获取body上的内容
 
