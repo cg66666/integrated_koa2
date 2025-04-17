@@ -3,7 +3,7 @@
  * @Author: cg
  * @Date: 2024-08-20 17:38:06
  * @LastEditors: cg
- * @LastEditTime: 2025-04-09 16:27:55
+ * @LastEditTime: 2025-04-17 21:43:17
  */
 import { WebSocketServer, WebSocket } from "ws";
 import { room_db } from "../app.js";
@@ -44,7 +44,6 @@ const checkInfo = async (ws, msg, wsChatList) => {
       );
       return;
     }
-    log
     if (!roomInfo.userList.includes(user)) roomInfo.userList.push(user);
     wsChatList.forEach((client) => {
       if (client.room === room && client.ws.readyState === WebSocket.OPEN) {
@@ -128,9 +127,11 @@ function route(ws, wss, path) {
             tempInfo.user +
             tempInfo.password +
             tempInfo.isAnonymity;
-          let length = roomInfo.chatUserList.length;
+          let length = roomInfo.userList.length;
+          // console.log("length", roomInfo, length);
+
           // 延迟清空房间，防止因为用户刷新就清空房间
-          if (length === 1) {
+          if (length === 1 && roomInfo.userList.includes(tempInfo.user)) {
             setTimeout(async () => {
               if (
                 chatUserList[string] &&
@@ -141,10 +142,10 @@ function route(ws, wss, path) {
             }, 3000);
           } else {
             chatUserList[string] = undefined;
-            const index = roomInfo.chatUserList.indexOf(tempInfo.user);
+            const index = roomInfo.userList.indexOf(tempInfo.user);
             if (index >= 0) {
-              roomInfo.chatUserList.splice(index, 1);
-              length = roomInfo.chatUserList.length;
+              roomInfo.userList.splice(index, 1);
+              length = roomInfo.userList.length;
               await room_db.push(`/${tempInfo.room}`, roomInfo);
             }
           }
@@ -178,21 +179,21 @@ function route(ws, wss, path) {
         const data = JSON.parse(message);
         switch (data.type) {
           case "updateUser": {
-            const { userConfig,stopUpdate } = data;
+            const { userConfig, stopUpdate } = data;
             const target = tiptapUserList[userConfig.name];
             if (isInit) {
               userConfig2 = userConfig;
               isInit = false;
               wsTiptapList[userConfig.name] = ws;
             }
-         
+
             if (
               !target ||
               (target &&
                 (target.from != userConfig.from || target.to != userConfig.to))
             ) {
               tiptapUserList[userConfig.name] = userConfig;
-              if(stopUpdate) break
+              if (stopUpdate) break;
               Object.values(wsTiptapList).forEach((ws) => {
                 if (ws && ws.readyState === WebSocket.OPEN) {
                   ws.send(

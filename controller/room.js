@@ -3,7 +3,7 @@
  * @Author: cg
  * @Date: 2023-12-02 21:16:00
  * @LastEditors: cg
- * @LastEditTime: 2025-03-29 01:13:28
+ * @LastEditTime: 2025-04-17 21:42:18
  */
 // x-token 聊天室token
 import {
@@ -85,16 +85,17 @@ room_router.post("/leave", async (ctx, next) => {
   const roomInfo = await room_db.getData(`/${room}`);
   if (roomInfo.userList.length === 1) {
     await room_db.delete(`/${room}`);
-  } else {
-    const index = roomInfo.userList.indexOf(user);
-    roomInfo.userList.splice(index, 1);
-    if (roomInfo.userList.length === 0) {
-      await room_db.delete(`/${room}`);
-    } else {
-      roomInfo.updataTime = Date.now();
-      await room_db.push(`/${room}`, roomInfo);
-    }
-  }
+  } 
+  // else {
+  //   const index = roomInfo.userList.indexOf(user);
+  //   roomInfo.userList.splice(index, 1);
+  //   if (roomInfo.userList.length === 0) {
+  //     await room_db.delete(`/${room}`);
+  //   } else {
+  //     roomInfo.updataTime = Date.now();
+  //     await room_db.push(`/${room}`, roomInfo);
+  //   }
+  // }
   ctx.success = {
     msg: `房间退出成功！`,
   };
