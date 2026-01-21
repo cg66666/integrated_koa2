@@ -3,7 +3,7 @@
  * @Author: cg
  * @Date: 2024-08-20 17:38:06
  * @LastEditors: cg
- * @LastEditTime: 2025-04-17 21:43:17
+ * @LastEditTime: 2025-04-18 10:17:52
  */
 import { WebSocketServer, WebSocket } from "ws";
 import { room_db } from "../app.js";
@@ -68,7 +68,7 @@ const checkInfo = async (ws, msg, wsChatList) => {
 };
 
 // WebSocket 路由函数
-function route(ws, wss, path) {
+function route(ws, path) {
   switch (path) {
     case "/ws/chat":
       console.log("WebSocket chat 连接已建立！");
@@ -266,7 +266,7 @@ const ws = (server) => {
       // console.log(222, pathname);
 
       wss.handleUpgrade(request, socket, head, (ws) => {
-        route(ws, wss, pathname);
+        route(ws, pathname);
       });
     } else {
       // 如果路径不匹配 WebSocket，则关闭连接

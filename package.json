@@ -9,6 +9,7 @@
     "@alicloud/openapi-client": "^0.4.12",
     "@alicloud/tea-console": "^1.0.0",
     "@alicloud/tea-util": "^1.4.9",
+    "axios": "^1.8.4",
     "cgcg666_cli": "^1.0.5",
     "jsonwebtoken": "^9.0.2",
     "koa": "^2.14.2",

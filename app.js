@@ -3,7 +3,7 @@
  * @Author: 朱晨光
  * @Date: 2023-12-02 20:41:44
  * @LastEditors: cg
- * @LastEditTime: 2025-04-17 08:10:14
+ * @LastEditTime: 2026-01-22 00:46:26
  */
 
 // 引入日志工具
@@ -56,6 +56,11 @@ export const statement_db = new JsonDB(
 export const tiptap_db = new JsonDB(
   new Config("./db/tiptap/totalData", true, false, "/")
 );
+
+// 存储wx用户信息
+// export const wx_db = new JsonDB(
+//   new Config("./db/wx/wxUser", true, false, "/")
+// );
 
 import Koa from "koa";
 
