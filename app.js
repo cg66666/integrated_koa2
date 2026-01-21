@@ -3,64 +3,74 @@
  * @Author: 朱晨光
  * @Date: 2023-12-02 20:41:44
  * @LastEditors: cg
- * @LastEditTime: 2026-01-22 00:46:26
+ * @LastEditTime: 2026-01-22 01:06:55
  */
 
 // 引入日志工具
 export { accessLogger, loggerChatRoom, loggerSSO } from "./log/index.js";
 
-// 数据库声明（注意执行顺序）
-import { JsonDB, Config } from "node-json-db";
+export {
+  accountId_db,
+  user_db,
+  ticket_db,
+  session_db,
+  room_db,
+  statement_db,
+  tiptap_db,
+} from "./db.js";
 
-// account库，用于查重名称是否重复
-export const accountId_db = new JsonDB(
-  new Config("./db/sso/accountDataBase", true, false, "/")
-);
+// // 数据库声明（注意执行顺序）
+// import { JsonDB, Config } from "node-json-db";
 
-// 个人信息数据库
-export const user_db = new JsonDB(
-  new Config("./db/sso/userDataBase", true, false, "/")
-);
-
-// 历史记录数据库（用于查询所有账号登录历史 废弃废弃废弃废弃废弃废弃废弃废弃）
-// export const history_db = new JsonDB(
-//   new Config("./db/sso/historyDataBase", true, false, "/")
+// // account库，用于查重名称是否重复
+// export const accountId_db = new JsonDB(
+//   new Config("./db/sso/accountDataBase", true, false, "/")
 // );
 
-// 登录token存储数据库（用于查询token是否失效）
-// export const loginToken_db = new JsonDB(
-//   new Config("./db/sso/loginTokenDataBase", true, false, "/")
+// // 个人信息数据库
+// export const user_db = new JsonDB(
+//   new Config("./db/sso/userDataBase", true, false, "/")
 // );
 
-// 登录ticket存储数据库（用于项目页获取当前项目token，一次性）
-export const ticket_db = new JsonDB(
-  new Config("./db/sso/loginTicketDataBase", true, false, "/")
-);
+// // 历史记录数据库（用于查询所有账号登录历史 废弃废弃废弃废弃废弃废弃废弃废弃）
+// // export const history_db = new JsonDB(
+// //   new Config("./db/sso/historyDataBase", true, false, "/")
+// // );
 
-// 类似sessionId存储数据库
-export const session_db = new JsonDB(
-  new Config("./db/sso/sessionDataBase", true, false, "/")
-);
+// // 登录token存储数据库（用于查询token是否失效）
+// // export const loginToken_db = new JsonDB(
+// //   new Config("./db/sso/loginTokenDataBase", true, false, "/")
+// // );
 
-// 存储聊天室相关数据
-export const room_db = new JsonDB(
-  new Config("./db/chatRoom/roomDataBase", true, false, "/")
-);
-
-// 存储用户的自由表格相关信息
-export const statement_db = new JsonDB(
-  new Config("./db/statement/statementDataBase", true, false, "/")
-);
-
-// 存储tiptap文档内容
-export const tiptap_db = new JsonDB(
-  new Config("./db/tiptap/totalData", true, false, "/")
-);
-
-// 存储wx用户信息
-// export const wx_db = new JsonDB(
-//   new Config("./db/wx/wxUser", true, false, "/")
+// // 登录ticket存储数据库（用于项目页获取当前项目token，一次性）
+// export const ticket_db = new JsonDB(
+//   new Config("./db/sso/loginTicketDataBase", true, false, "/")
 // );
+
+// // 类似sessionId存储数据库
+// export const session_db = new JsonDB(
+//   new Config("./db/sso/sessionDataBase", true, false, "/")
+// );
+
+// // 存储聊天室相关数据
+// export const room_db = new JsonDB(
+//   new Config("./db/chatRoom/roomDataBase", true, false, "/")
+// );
+
+// // 存储用户的自由表格相关信息
+// export const statement_db = new JsonDB(
+//   new Config("./db/statement/statementDataBase", true, false, "/")
+// );
+
+// // 存储tiptap文档内容
+// export const tiptap_db = new JsonDB(
+//   new Config("./db/tiptap/totalData", true, false, "/")
+// );
+
+// // 存储wx用户信息
+// // export const wx_db = new JsonDB(
+// //   new Config("./db/wx/wxUser", true, false, "/")
+// // );
 
 import Koa from "koa";
 
@@ -82,11 +92,11 @@ import ws from "./ws/index.js";
 // 日志工具
 import { accessLogger } from "./app.js";
 
-import path from 'path';
+import path from "path";
 
 import { fileURLToPath } from "url";
 
-import staticMiddleware from 'koa-static';
+import staticMiddleware from "koa-static";
 
 // 加载定时期插件
 import schedule from "./db/schedule.js";
@@ -107,7 +117,7 @@ app.use(
   compress({
     threshold: 1024 * 2, // 只有响应体大于 1KB 才进行压缩
     br: false, // disable brotli
-  })
+  }),
 );
 
 app.use(router.routes()); // 添加路由中间件
