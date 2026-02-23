@@ -3,12 +3,18 @@
  * @Author: 朱晨光
  * @Date: 2023-12-05 09:03:42
  * @LastEditors: cg
- * @LastEditTime: 2025-04-09 15:14:25
+ * @LastEditTime: 2026-02-23 22:23:17
  */
-import Dysmsapi20170525 from "@alicloud/dysmsapi20170525";
-import OpenApi from "@alicloud/openapi-client";
-import Util from "@alicloud/tea-util";
-import Console from "@alicloud/tea-console";
+// import Dysmsapi20170525 from "@alicloud/dysmsapi20170525";
+// import OpenApi from "@alicloud/openapi-client";
+// import Util from "@alicloud/tea-util";
+// import Console from "@alicloud/tea-console";
+
+import Dypnsapi20170525, * as $Dypnsapi20170525 from "@alicloud/dypnsapi20170525";
+import * as $OpenApi from "@alicloud/openapi-client";
+import * as $Util from "@alicloud/tea-util";
+import Credential, { Config } from "@alicloud/credentials";
+
 import {
   user_db,
   accountId_db,
@@ -99,7 +105,7 @@ SSO_router.post("/getLogingToken", async (ctx, next) => {
         });
         const loginingToken = jwt.sign(
           { redirectUrl, verificationCode: captcha.text },
-          secret.loginingSecret
+          secret.loginingSecret,
         );
         ctx.type = "image/svg+xml"; // 设置 Content-Type 为 SVG
         ctx.success = {
@@ -121,7 +127,7 @@ SSO_router.post("/getLogingToken", async (ctx, next) => {
       });
       const loginingToken = jwt.sign(
         { redirectUrl, verificationCode: captcha.text },
-        secret.loginingSecret
+        secret.loginingSecret,
       );
       ctx.type = "image/svg+xml"; // 设置 Content-Type 为 SVG
       ctx.success = {
@@ -152,7 +158,7 @@ SSO_router.post("/getLogingToken", async (ctx, next) => {
     // 生成登录token，无过期时间
     const loginingToken = jwt.sign(
       { redirectUrl, verificationCode: captcha.text },
-      secret.loginingSecret
+      secret.loginingSecret,
     );
     ctx.type = "image/svg+xml"; // 设置 Content-Type 为 SVG
     ctx.success = {
@@ -251,7 +257,7 @@ SSO_router.post(
       }
     }
     await next();
-  }
+  },
   // setLoginHistory
 );
 
@@ -336,7 +342,7 @@ SSO_router.post(
       }
     }
     await next();
-  }
+  },
   // setLoginHistory
 );
 
@@ -344,20 +350,42 @@ SSO_router.post(
 SSO_router.get("/phone/postCaptcha", veriftSSOToken, async (ctx, next) => {
   if (ctx.fail) return await next();
   const phone = ctx.query.phone;
-  console.log("decryptToken", ctx.decryptToken);
-
   if (!phone) {
     ctx.fail = {
       msg: `传参缺失！`,
     };
   } else {
+    const credentialsConfig = new Config({
+      // 凭证类型。
+      type: "access_key",
+      // 设置accessKeyId值，此处已从环境变量中获取accessKeyId为例。
+      accessKeyId: process.env["DATABASE_KEY"],
+      // 设置accessKeySecret值，此处已从环境变量中获取accessKeySecret为例。
+      accessKeySecret: process.env["DATABASE_SECRET"],
+    });
+
+    const credential = new Credential.default(credentialsConfig);
+
+    let config = new $OpenApi.Config({
+      credential: credential,
+    });
+    config.endpoint = `dypnsapi.aliyuncs.com`;
+    let client = new Dypnsapi20170525.default(config);
+
     const decryptToken = ctx.decryptToken;
     const redirectUrl = decryptToken.redirectUrl;
-    // const tokenUniqueId = await produceToken();
-    // 生成登录token，无过期时间
+
     const randomNumber =
       Math.floor(Math.random() * (99999 - 10000 + 1)) + 10000;
-    console.log(`randomNumber：${randomNumber}`);
+
+    let sendSmsVerifyCodeRequest =
+      new $Dypnsapi20170525.SendSmsVerifyCodeRequest({
+        signName: "速通互联验证码",
+        templateCode: "100001",
+        phoneNumber: phone,
+        templateParam: `{"code":${randomNumber},"min":"5"}`,
+      });
+
     const loginingToken = jwt.sign(
       {
         phone,
@@ -365,59 +393,32 @@ SSO_router.get("/phone/postCaptcha", veriftSSOToken, async (ctx, next) => {
         verificationCode: randomNumber,
         expireTime: Date.now() + 1 * 60 * 1000,
       },
-      secret.loginingSecret
+      secret.loginingSecret,
     );
 
-    let config = new OpenApi.Config({
-      // 必填，请确保代码运行环境设置了环境变量 DATABASE_KEY
-      accessKeyId: process.env["DATABASE_KEY"],
-      // 必填，请确保代码运行环境设置了环境变量 DATABASE_SECRET
-      accessKeySecret: process.env["DATABASE_SECRET"],
-      // Endpoint 请参考 https://api.aliyun.com/product/Dysmsapi
-      endpoint: `dysmsapi.aliyuncs.com`,
-    });
-
-    let client = new Dysmsapi20170525.default(config);
-
-    let sendSmsRequest = new Dysmsapi20170525.SendSmsRequest({
-      signName: "cg登录",
-      templateCode: "SMS_474975229",
-      phoneNumbers: phone,
-      templateParam: `{"code":"${randomNumber}"}`,
-    });
-    let runtime = new Util.RuntimeOptions({});
-    // ctx.success = {
-    //   data: {
-    //     loginingToken,
-    //   },
-    // };
     try {
-      let resp = await client.sendSmsWithOptions(sendSmsRequest, runtime);
       loggerSSO.info({
         msg: "发送短信验证码",
         phone,
       });
-      console.log("resp", resp.body.code);
-      if (resp.body.code === "isv.BUSINESS_LIMIT_CONTROL") {
-        console.log(111);
 
-        ctx.fail = {
-          msg: `此手机号，当天或当前小时内发送次数达上限！`,
-        };
-      } else {
-        Console.default.log(Util.default.toJSONString(resp));
-        ctx.success = {
-          data: {
-            loginingToken,
-          },
-        };
-      }
+      let runtime = new $Util.RuntimeOptions({});
+      let resp = await client.sendSmsVerifyCodeWithOptions(
+        sendSmsVerifyCodeRequest,
+        runtime,
+      );
+      // console.log(JSON.stringify(resp, null, 2));
+      ctx.success = {
+        data: {
+          loginingToken,
+        },
+      };
     } catch (error) {
+      // 此处仅做打印展示，请谨慎对待异常处理，在工程项目中切勿直接忽略异常。
       // 错误 message
-      console.log(111, error.message);
+      console.log(error.message);
       // 诊断地址
-      console.log(222, error.data["Recommend"]);
-      Util.default.assertAsString(333, error.message);
+      console.log(error.data["Recommend"]);
     }
   }
 
