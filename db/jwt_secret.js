@@ -3,7 +3,7 @@
  * @Author: 朱晨光
  * @Date: 2023-12-12 09:29:03
  * @LastEditors: cg
- * @LastEditTime: 2025-03-28 19:05:34
+ * @LastEditTime: 2026-02-24 17:16:30
  */
 export default {
   // 用于生成登录页的临时token，与验证码挂钩
@@ -15,5 +15,7 @@ export default {
   // 用于生成自由表单页内容
   statementSecret: "27X1_ryRvDJ9.eyJpZ",
   // 用于生成tiptap页的token
-  tiptapSecret:"rG842Cw_43g3Ed.e1G"
+  tiptapSecret:"rG842Cw_43g3Ed.e1G",
+  // 用于生成ai页的token
+  aiSecret:'tI8/lO1{wO0)kH4_tS'
 };

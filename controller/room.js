@@ -3,7 +3,7 @@
  * @Author: cg
  * @Date: 2023-12-02 21:16:00
  * @LastEditors: cg
- * @LastEditTime: 2025-04-17 21:42:18
+ * @LastEditTime: 2026-02-27 16:56:54
  */
 // x-token 聊天室token
 import {
@@ -16,9 +16,12 @@ import {
   loggerChatRoom,
 } from "../app.js";
 import koaRouter from "koa-router";
+import handleCheckToken from "../middleware/handleCheckToken.js";
 
 // jwt相关配置
 import jwt from "jsonwebtoken";
+import getToken from "../middleware/getToken.js";
+import logout from "../middleware/logout.js";
 
 import secret from "../db/jwt_secret.js";
 const room_router = new koaRouter();
@@ -85,7 +88,7 @@ room_router.post("/leave", async (ctx, next) => {
   const roomInfo = await room_db.getData(`/${room}`);
   if (roomInfo.userList.length === 1) {
     await room_db.delete(`/${room}`);
-  } 
+  }
   // else {
   //   const index = roomInfo.userList.indexOf(user);
   //   roomInfo.userList.splice(index, 1);
@@ -103,78 +106,28 @@ room_router.post("/leave", async (ctx, next) => {
 });
 
 // 根据ticket获取token
-room_router.post("/getToken", async (ctx, next) => {
-  if (ctx.fail) return await next();
-  const { ticket } = ctx.request.body;
-  if (!ticket) {
-    ctx.fail = {
-      msg: "参数缺失！",
-    };
-  } else if (await ticket_db.exists(`/${ticket}`)) {
-    let data = await ticket_db.getData(`/${ticket}`);
-    if (data.expireTime < Date.now()) {
-      ctx.status = 401;
-      ctx.success = {
-        msg: "登录信息失效！",
-      };
-    } else {
-      const token = jwt.sign(
-        { id: data.id, expireTime: data.expireTime },
-        secret.roomSecret
-      );
-      ctx.cookies.set("X-TOKEN", token, {
-        overwrite: true,
-        httpOnly: false,
-      });
-      ctx.success = {
-        msg: "登陆成功",
-      };
-    }
-    // 删除对应ticket
-    await ticket_db.delete(`/${ticket}`);
-  } else {
-    ctx.status = 401;
-    ctx.success = {
-      msg: "登录信息失效！",
-    };
-  }
-  await next();
-});
+room_router.post(
+  "/getToken",
+  async (ctx, next) => {
+    if (ctx.fail) return await next();
+    ctx.secret = secret.roomSecret;
+    ctx.tokenName = "X-TOKEN";
+    await next();
+  },
+  getToken,
+);
 
 // 校验token
-room_router.get("/checkToken", async (ctx, next) => {
-  if (ctx.fail) return await next();
-  const token = ctx.header["x-token"];
-  if (token) {
-    let handleData;
-    try {
-      handleData = jwt.verify(token, secret.roomSecret);
-      if (await session_db.exists(`/${handleData.id}`)) {
-        const sessionData = await session_db.getData(`/${handleData.id}`);
-        if (sessionData.expireTime >= Date.now()) {
-          ctx.success = {
-            data: {
-              ok: true,
-            },
-          };
-        }
-      }else{
-        ctx.status = 401;
-        ctx.success = {
-          msg: "登录信息失效！",
-        };
-      }
-    } catch {}
-  }
-  if (!ctx.success) {
-    ctx.success = {
-      data: {
-        ok: false,
-      },
-    };
-  }
-  await next();
-});
+room_router.get(
+  "/checkToken",
+  async (ctx, next) => {
+    if (ctx.fail) return await next();
+    ctx.token = ctx.header["x-token"];
+    ctx.secret = secret.roomSecret;
+    await next();
+  },
+  handleCheckToken,
+);
 
 // 获取登录用户信息
 room_router.get("/getUserInfo", async (ctx, next) => {
@@ -203,31 +156,16 @@ room_router.get("/getUserInfo", async (ctx, next) => {
 });
 
 // 全局退出登录
-room_router.get("/logout", async (ctx, next) => {
-  if (ctx.fail) return await next();
-  const token = ctx.header["x-token"];
-  if (!token) {
-    ctx.success = {
-      msg: "退出登陆成功！",
-    };
-  } else {
-    let handleData;
-    try {
-      handleData = jwt.verify(token, secret.roomSecret);
-      await session_db.delete(`/${handleData.id}`);
-    } catch {}
-    // 清空名cookie
-    ctx.cookies.set("X-TOKEN", "", {
-      // 设置过期时间为过去的一个时间点，这会让浏览器立即删除这个 cookie
-      expires: new Date(1), // 或者使用 maxAge: -1
-      overwrite: true,
-      httpOnly: false,
-    });
-    ctx.success = {
-      msg: "退出登陆成功！",
-    };
-  }
-  await next();
-});
+room_router.get(
+  "/logout",
+  async (ctx, next) => {
+    if (ctx.fail) return await next();
+    ctx.tokenName = "X-TOKEN";
+    ctx.secret = secret.roomSecret;
+    ctx.token = ctx.header["x-token"];
+    await next();
+  },
+  logout,
+);
 
 export default room_router;

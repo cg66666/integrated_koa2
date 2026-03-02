@@ -3,7 +3,7 @@
  * @Author: 朱晨光
  * @Date: 2023-12-02 20:41:44
  * @LastEditors: cg
- * @LastEditTime: 2026-01-22 01:06:55
+ * @LastEditTime: 2026-02-27 03:56:56
  */
 
 // 引入日志工具
@@ -98,6 +98,8 @@ import { fileURLToPath } from "url";
 
 import staticMiddleware from "koa-static";
 
+import  sequelize  from "./mysql.js";
+
 // 加载定时期插件
 import schedule from "./db/schedule.js";
 schedule();
@@ -130,6 +132,15 @@ app.use(handleResStatus); // 对返回code码统一处理
 app.use(accessLogger());
 
 const server = app.listen(8888, () => {
+  // 测试数据库连接
+  sequelize
+    .authenticate()
+    .then(() => {
+      console.log("✅ 数据库连接成功");
+    })
+    .catch((err) => {
+      console.error("❌ 数据库连接失败:", err);
+    });
   let port = server.address().port;
   console.log("服务器开启: http://localhost:8888/", port);
   console.log("已配置当前环境变量", {
