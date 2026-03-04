@@ -3,7 +3,7 @@
  * @Author: cg
  * @Date: 2026-02-24 17:14:30
  * @LastEditors: cg
- * @LastEditTime: 2026-03-02 15:13:17
+ * @LastEditTime: 2026-03-04 15:41:07
  */
 import koaRouter from "koa-router";
 import OpenAI from "openai";
@@ -199,7 +199,7 @@ const getTitle = async (question, answer) => {
   `;
   const messageList = [{ role: "user", content: message }];
   const response = await client.chat.completions.create({
-    model: "qwen-plus",
+    model: "qwen3.5-plus",
     messages: messageList,
     enable_thinking: false,
   });
@@ -241,7 +241,7 @@ ai_router.post("/chat", async (ctx, next) => {
   let fullMessage = "";
   try {
     const response = await client.chat.completions.create({
-      model: "qwen-plus",
+      model: "qwen3.5-plus",
       messages: curDetail,
       // temperature: 1,
       enable_thinking: false,
