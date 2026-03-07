@@ -26,6 +26,9 @@ importers:
       cgcg666_cli:
         specifier: ^1.0.5
         version: 1.0.5(@types/node@22.14.0)
+      dayjs:
+        specifier: ^1.11.19
+        version: 1.11.19
       jsonwebtoken:
         specifier: ^9.0.2
         version: 9.0.2
@@ -493,6 +496,9 @@ packages:
     resolution: {integrity: sha512-lAJqBmFzCLcDJdI9cEnJ7loSkLTh1PbIgZUndlzvYbf6NyFEr5n9rQhOwr6CIGwZqyQ3sYeQQiP9NOVQmgmRMA==}
     engines: {node: '>=4.0'}
     deprecated: 1.x is no longer supported. Please upgrade to 4.x or higher.
+
+  dayjs@1.11.19:
+    resolution: {integrity: sha512-t5EcLVS6QPBNqM2z8fakk/NKel+Xzshgt8FFKAn+qwlD1pzZWxh0nVCrvFK7ZDb6XucZeF9z8C7CBWTRIVApAw==}
 
   debug@3.2.7:
     resolution: {integrity: sha512-CFjzYYAi4ThfiQvizrFQevTTXHtnCqWfe7x1AhgEscTz6ZbLbfoLRLPugTQyBth6f8ZERVUSyWHFD/7Wu4t1XQ==}
@@ -1893,6 +1899,8 @@ snapshots:
       luxon: 3.6.1
 
   date-format@1.2.0: {}
+
+  dayjs@1.11.19: {}
 
   debug@3.2.7:
     dependencies:

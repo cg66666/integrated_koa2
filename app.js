@@ -3,7 +3,7 @@
  * @Author: 朱晨光
  * @Date: 2023-12-02 20:41:44
  * @LastEditors: cg
- * @LastEditTime: 2026-02-27 03:56:56
+ * @LastEditTime: 2026-03-07 13:32:41
  */
 
 // 引入日志工具
@@ -17,6 +17,7 @@ export {
   room_db,
   statement_db,
   tiptap_db,
+  gold_db
 } from "./db.js";
 
 // // 数据库声明（注意执行顺序）
@@ -99,6 +100,11 @@ import { fileURLToPath } from "url";
 import staticMiddleware from "koa-static";
 
 import  sequelize  from "./mysql.js";
+
+import {getGoldPrice} from './automation.js'
+
+// 开启定时任务
+getGoldPrice()
 
 // 加载定时期插件
 import schedule from "./db/schedule.js";

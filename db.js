@@ -3,7 +3,7 @@
  * @Author: cg
  * @Date: 2026-01-22 00:50:50
  * @LastEditors: cg
- * @LastEditTime: 2026-01-22 00:51:06
+ * @LastEditTime: 2026-03-07 13:10:01
  */
 // 数据库声明（注意执行顺序）
 import { JsonDB, Config } from "node-json-db";
@@ -51,4 +51,9 @@ export const statement_db = new JsonDB(
 // 存储tiptap文档内容
 export const tiptap_db = new JsonDB(
   new Config("./db/tiptap/totalData", true, false, "/")
+);
+
+// 存储黄金价格上下限
+export const gold_db = new JsonDB(
+  new Config("./db/gold/price", true, false, "/")
 );
