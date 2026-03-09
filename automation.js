@@ -28,10 +28,10 @@ export const getGoldPrice = async () => {
       return;
     }
   }
-  if (gold_db.exists("/max") && gold_db.exists("/min")) {
+  if (await gold_db.exists("/max") && await gold_db.exists("/min")) {
     try {
-      const max = gold_db.getData("/max");
-      const min = gold_db.getData("/min");
+      const max =await gold_db.getData("/max");
+      const min =await gold_db.getData("/min");
       const res = await axios({
         url: "https://api.jdjygold.com/gw2/generic/jrm/h5/m/stdLatestPrice?productSku=1961543816",
         method: "GET",
@@ -39,8 +39,8 @@ export const getGoldPrice = async () => {
       const curPrice = res.data.resultData.datas.price;
       const minDiff = curPrice - min;
       const maxDiff = max - curPrice;
-      if (minDiff < 5 || maxDiff < 5) {
-        time = 2500;
+      if (minDiff < 3 || maxDiff < 3) {
+        time = 5000;
         if (minDiff <= 0 || maxDiff <= 0) {
           if (!isPush) {
             curPrice * 10;
@@ -88,7 +88,7 @@ export const getGoldPrice = async () => {
           isPush = false;
         }
       } else {
-        time = 6000;
+        time = 10000;
         isPush = false;
       }
     } catch (err) {
