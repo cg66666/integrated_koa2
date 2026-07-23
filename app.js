@@ -3,7 +3,7 @@
  * @Author: 朱晨光
  * @Date: 2023-12-02 20:41:44
  * @LastEditors: cg
- * @LastEditTime: 2026-03-07 13:32:41
+ * @LastEditTime: 2026-03-16 01:40:41
  */
 
 // 引入日志工具
@@ -104,7 +104,7 @@ import  sequelize  from "./mysql.js";
 import {getGoldPrice} from './automation.js'
 
 // 开启定时任务
-getGoldPrice()
+// getGoldPrice()
 
 // 加载定时期插件
 import schedule from "./db/schedule.js";
